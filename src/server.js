@@ -1,10 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { env } from './utils/env.js';
 
-// const PORT = Number(env('PORT', '3000'));
-const PORT = 3000;
+dotenv.config();
+
+const PORT = Number(env('PORT', '3000'));
 
 export const startServer = () => {
   const app = express();
