@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 
-const pharmacySchema = new Schema(
+const storeSchema = new Schema(
   {
     name: {
       type: String,
@@ -22,12 +22,13 @@ const pharmacySchema = new Schema(
       type: Number,
       required: true,
     },
+    status: {
+      type: String,
+      require: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );
 
-export const PharmacyCollection = model('pharmacies', pharmacySchema);
-export const NearestPharmacyCollection = model(
-  'nearest_pharmacies',
-  pharmacySchema,
-);
+export const StoreCollection = model('pharmacies', storeSchema);
+export const NearestStoreCollection = model('nearest_pharmacies', storeSchema);

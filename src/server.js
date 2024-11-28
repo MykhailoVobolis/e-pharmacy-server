@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { env } from './utils/env.js';
+import router from './routers/index.js';
 
 dotenv.config();
 
@@ -27,11 +28,7 @@ export const startServer = () => {
 
   app.use(cors(corsOptions));
 
-  app.get('/', (req, res) => {
-    res.json({
-      message: 'Hello world!',
-    });
-  });
+  app.use(router);
 
   app.use('*', notFoundHandler);
 

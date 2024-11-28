@@ -2,8 +2,6 @@ import { model, Schema } from 'mongoose';
 
 const sessionsSchema = new Schema(
   {
-    name: { type: String },
-    email: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: 'users' },
     accessToken: { type: String, required: true },
     refreshToken: { type: String, required: true },
