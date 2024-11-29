@@ -5,7 +5,7 @@ export const getCustomerReviews = async (req, res) => {
 
   const customerReviews = await ReviewsCollection.find().limit(limit);
 
-  res.json({
+  res.status(200).json({
     status: 200,
     message: 'Successfully found reviews!',
     data: customerReviews,

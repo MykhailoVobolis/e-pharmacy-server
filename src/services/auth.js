@@ -1,40 +1,10 @@
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
-import jwt from 'jsonwebtoken';
 
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
-import { env } from '../utils/env.js';
-import {
-  ACCESS_TOKEN_LIFETIME,
-  REFRESH_TOKEN_LIFETIME,
-} from '../constants/index.js';
-import { parseRefreshToken } from '../utils/parseRefreshToken.js';
-
-// Функція створення сессії
-const createSession = (_id) => {
-  const accessToken = jwt.sign(
-    {
-      _id: _id,
-    },
-    env('JWT_SECRET'),
-    {
-      expiresIn: '15m',
-    },
-  );
-
-  const refreshToken = jwt.sign({ _id: _id }, env('JWT_REFRESH_SECRET'), {
-    expiresIn: '30d',
-  });
-
-  return {
-    userId: _id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_LIFETIME),
-    refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_LIFETIME),
-  };
-};
+import { parseToken } from '../utils/parseToken.js';
+import { createSession } from '../utils/createSession.js';
 
 export const registerUser = async (payload) => {
   // перевірка на унікальність email
@@ -71,20 +41,15 @@ export const loginUser = async (payload) => {
   });
 };
 
-export const logoutUser = async (authorization) => {
-  // Перевірка наявності токена
-  if (!authorization) {
-    throw createHttpError(401, 'No token provided');
-  }
-
-  const token = authorization.split(' ')[1]; // Витягуємо токен після 'Bearer'
-
+export const logoutUser = async (accessToken) => {
   // Знаходимо сесію за `accessToken`
-  const session = await SessionsCollection.findOne({ accessToken: token });
+  const session = await SessionsCollection.findOne({
+    accessToken: accessToken,
+  });
+
   if (!session) {
     throw createHttpError(404, 'Session not found');
   }
-
   // Видаляємо сесію з бази
   await SessionsCollection.deleteOne({ _id: session._id });
 };
@@ -95,7 +60,7 @@ export const refreshUsersSession = async ({ refreshToken }) => {
     throw createHttpError(400, 'Refresh token is required');
   }
 
-  const { _id } = parseRefreshToken(refreshToken);
+  const { _id } = parseToken(refreshToken, 'refresh');
 
   const session = await SessionsCollection.findOne({
     userId: _id,

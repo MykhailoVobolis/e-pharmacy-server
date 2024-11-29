@@ -44,9 +44,9 @@ export const loginUserController = async (req, res) => {
 
 // Контроллер logout користувача
 export const logoutUserController = async (req, res) => {
-  const { authorization } = req.headers;
+  const { accessToken } = req; // Додаємо токен до `req` через `authenticate`
 
-  await logoutUser(authorization);
+  await logoutUser(accessToken);
 
   res.status(200).json({ message: 'Logout successful' });
 };
@@ -60,11 +60,25 @@ export const refreshSessionController = async (req, res) => {
   });
 
   res.status(200).json({
-    status: 201,
+    status: 200,
     message: 'Successfully refreshed a session!',
     data: {
       accessToken: newSession.accessToken,
       refreshToken: newSession.refreshToken,
+    },
+  });
+};
+
+// Контролер отримання даних юзера
+export const fetchUserInfoController = async (req, res) => {
+  const { name, email } = req.user;
+
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully found user info!',
+    data: {
+      userName: name,
+      userEmail: email,
     },
   });
 };
