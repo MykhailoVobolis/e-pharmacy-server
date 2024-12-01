@@ -2,6 +2,7 @@ import createHttpError from 'http-errors';
 import {
   getAllProducts,
   getCategoriesAllProducts,
+  getProductById,
 } from '../services/products.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
@@ -37,5 +38,23 @@ export const getProductsController = async (req, res, _next) => {
     status: 200,
     message: 'Successfully found products!',
     data: products,
+  });
+};
+
+// Контроллер отримання продукту за його id
+export const getProductByIdController = async (req, res, next) => {
+  const { productId } = req.params;
+  const product = await getProductById(productId);
+
+  if (!product) {
+    next(createHttpError(404, 'Product not found'));
+    return;
+  }
+
+  // Відповідь, якщо студента знайдено
+  res.status(200).json({
+    status: 200,
+    message: `Successfully found product with id ${productId}!`,
+    data: product,
   });
 };

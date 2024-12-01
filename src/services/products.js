@@ -1,6 +1,16 @@
 import { ProductsCollection } from '../db/models/product.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
+// Сервіс-функція яка отримує категорії всіх продуктів з бази данних
+export const getCategoriesAllProducts = async () => {
+  const products = await ProductsCollection.find({}, 'category');
+  // Фільтрація унікальних значень категорій
+  const categories = [...new Set(products.map((item) => item.category))];
+
+  return categories;
+};
+
+// Сервіс-функція яка отримує всі продукти з бази данних
 export const getAllProducts = async ({
   page = 1,
   perPage = 12,
@@ -22,11 +32,11 @@ export const getAllProducts = async ({
       .collation({ locale: 'en', strength: 2 }); // ігнорує регістр введеного значення
   }
 
-  const productsCount = await ProductsCollection.find()
-    .merge(productsQuery)
-    .countDocuments();
-
-  const products = await productsQuery.skip(skip).limit(limit).exec();
+  /* Використання Promise.all для поліпшення продуктивності */
+  const [productsCount, products] = await Promise.all([
+    ProductsCollection.find().merge(productsQuery).countDocuments(),
+    productsQuery.skip(skip).limit(limit).exec(),
+  ]);
 
   const paginationData = calculatePaginationData(productsCount, perPage, page);
 
@@ -36,10 +46,8 @@ export const getAllProducts = async ({
   };
 };
 
-export const getCategoriesAllProducts = async () => {
-  const products = await ProductsCollection.find({}, 'category');
-  // Фільтрація унікальних значень категорій
-  const categories = [...new Set(products.map((item) => item.category))];
-
-  return categories;
+// Сервіс-функція яка отримує один продукт з бази данних за його ID
+export const getProductById = async (productId) => {
+  const product = await ProductsCollection.findById(productId);
+  return product;
 };
