@@ -9,19 +9,22 @@ const parseCategory = (category, categories) => {
   }
 };
 
-const parseName = (name) => {
-  return typeof name === 'string' ? name : undefined;
+const parseString = (value) => {
+  return typeof value === 'string' ? value : undefined;
 };
 
 export const parseFilterParams = (query, categories) => {
-  const { category, name } = query;
+  const { category, name, discount } = query;
 
   const parsedCategory = parseCategory(category, categories);
 
-  const parsedName = parseName(name);
+  const parsedName = parseString(name);
+
+  const parsedDiscount = parseString(discount);
 
   return {
     category: parsedCategory,
     name: parsedName,
+    discount: parsedDiscount,
   };
 };

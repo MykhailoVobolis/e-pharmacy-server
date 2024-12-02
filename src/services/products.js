@@ -32,6 +32,10 @@ export const getAllProducts = async ({
       .collation({ locale: 'en', strength: 2 }); // ігнорує регістр введеного значення
   }
 
+  if (filter.discount) {
+    productsQuery.where('discount').equals(filter.discount);
+  }
+
   /* Використання Promise.all для поліпшення продуктивності */
   const [productsCount, products] = await Promise.all([
     ProductsCollection.find().merge(productsQuery).countDocuments(),

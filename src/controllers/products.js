@@ -51,7 +51,7 @@ export const getProductByIdController = async (req, res, next) => {
     return;
   }
 
-  // Відповідь, якщо студента знайдено
+  // Відповідь, якщо продукт знайдено
   res.status(200).json({
     status: 200,
     message: `Successfully found product with id ${productId}!`,
