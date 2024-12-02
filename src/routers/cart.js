@@ -4,6 +4,7 @@ import { validateBody } from '../middlewares/validateBody.js';
 import { cartSchema } from '../validation/cart.js';
 import {
   addProductsToCartController,
+  deleteProductFromCartController,
   getCartByIdController,
 } from '../controllers/cart.js';
 import { authenticate } from '../middlewares/authenticate.js';
@@ -18,5 +19,11 @@ router.put(
 );
 
 router.get('/', authenticate, ctrlWrapper(getCartByIdController));
+
+router.delete(
+  '/product/delete',
+  authenticate,
+  ctrlWrapper(deleteProductFromCartController),
+);
 
 export default router;

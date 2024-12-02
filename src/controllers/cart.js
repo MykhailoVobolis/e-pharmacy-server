@@ -1,4 +1,8 @@
-import { addProductsToCart, getCartById } from '../services/cart.js';
+import {
+  addProductsToCart,
+  deleteProductFromCart,
+  getCartById,
+} from '../services/cart.js';
 import { transformCartData } from '../utils/transformCartData.js';
 
 export const addProductsToCartController = async (req, res) => {
@@ -26,6 +30,21 @@ export const getCartByIdController = async (req, res) => {
   res.status(200).json({
     status: 200,
     message: `Successfully found user cart!`,
+    data,
+  });
+};
+
+export const deleteProductFromCartController = async (req, res) => {
+  const userId = req.user._id;
+  const { productId } = req.body;
+
+  const updatedCart = await deleteProductFromCart(userId, productId);
+
+  const data = transformCartData(updatedCart);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Product removed from cart',
     data,
   });
 };

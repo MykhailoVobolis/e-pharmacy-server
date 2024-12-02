@@ -48,9 +48,7 @@ export const addProductsToCart = async (userId, products) => {
     }
   });
 
-  // Кількість продуктів у кошику
   cart.totalProducts = cart.products.length;
-  // Сума всіх товарів у кошику
   cart.totalPrice = cart.products
     .reduce(
       (total, product) => total + parseFloat(product.price) * product.quantity,
@@ -60,10 +58,9 @@ export const addProductsToCart = async (userId, products) => {
 
   await cart.save();
 
-  // Підтягуємо дані про всі продукти з колекції ProductsCollection
   const populatedCart = await CartCollection.findById(cart._id).populate(
-    'products.productId', // Динамічно витягуємо дані про продукт
-    'photo name category price', // Обираємо лише потрібні поля
+    'products.productId',
+    'photo name category price',
   );
 
   return populatedCart;
@@ -76,12 +73,43 @@ export const getCartById = async (userId) => {
     throw createHttpError(404, 'Cart not found');
   }
 
-  // Підтягуємо дані про всі продукти з колекції ProductsCollection
   const populatedCart = await CartCollection.findById(cart._id).populate(
-    'products.productId', // Динамічно витягуємо дані про продукт
-    'photo name category price', // Обираємо лише потрібні поля
+    'products.productId',
+    'photo name category price',
   );
 
-  //   return cart;
+  return populatedCart;
+};
+
+export const deleteProductFromCart = async (userId, productId) => {
+  const cart = await CartCollection.findOne({ userId });
+
+  if (!cart) {
+    throw createHttpError(404, 'Cart not found');
+  }
+
+  // Фільтруємо продукти, щоб видалити потрібний
+  const updatedProducts = cart.products.filter(
+    (item) => item.productId.toString() !== productId,
+  );
+
+  if (updatedProducts.length === cart.products.length) {
+    throw createHttpError(404, 'Product not found in cart');
+  }
+
+  // Оновлюємо продукти, totalProducts та totalPrice
+  cart.products = updatedProducts;
+  cart.totalProducts = updatedProducts.length;
+  cart.totalPrice = updatedProducts
+    .reduce((total, product) => total + product.price * product.quantity, 0)
+    .toFixed(2);
+
+  await cart.save();
+
+  const populatedCart = await CartCollection.findById(cart._id).populate(
+    'products.productId',
+    'photo name category price',
+  );
+
   return populatedCart;
 };
