@@ -1,5 +1,6 @@
 import {
   addProductsToCart,
+  createOrder,
   deleteProductFromCart,
   getCartById,
 } from '../services/cart.js';
@@ -46,5 +47,18 @@ export const deleteProductFromCartController = async (req, res) => {
     status: 200,
     message: 'Product removed from cart',
     data,
+  });
+};
+
+export const createOrderController = async (req, res) => {
+  const userId = req.user._id; // userId витягується через middleware authenticate
+  const { orderDetails } = req.body; // Дані про оплату передаються в body
+
+  const order = await createOrder(userId, orderDetails);
+
+  res.status(201).json({
+    status: 200,
+    message: 'Order successfully created',
+    order,
   });
 };

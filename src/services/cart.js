@@ -1,5 +1,7 @@
 import createHttpError from 'http-errors';
 import { CartCollection } from '../db/models/cart.js';
+import { OrderCollection } from '../db/models/order.js';
+import { transformCartData } from '../utils/transformCartData.js';
 
 export const addProductsToCart = async (userId, products) => {
   // Шукаємо кошик користувача за його унікальним ідентифікатором (userId)
@@ -112,4 +114,46 @@ export const deleteProductFromCart = async (userId, productId) => {
   );
 
   return populatedCart;
+};
+
+export const createOrder = async (userId, orderDetails) => {
+  const cart = await CartCollection.findOne({ userId });
+
+  if (!cart) {
+    throw createHttpError(404, 'Cart not found');
+  }
+
+  if (!cart || cart.products.length === 0) {
+    throw createHttpError(400, 'Cart is empty');
+  }
+
+  const populatedCart = await CartCollection.findById(cart._id).populate(
+    'products.productId',
+    'photo name category price',
+  );
+
+  const data = transformCartData(populatedCart);
+
+  // Створення замовлення у DB
+  await OrderCollection.create({
+    userId,
+    products: cart.products,
+    totalPrice: cart.totalPrice,
+    orderDetails, // Зберегти дані про деталі замовлення (оплата, адреса, контакти)
+    status: 'confirmed', // Замовлення підтверджене
+  });
+
+  // Очистити кошик
+  cart.products = [];
+  cart.totalProducts = 0;
+  cart.totalPrice = 0;
+
+  await cart.save();
+
+  return {
+    data,
+    orderDetails,
+    status: 'confirmed',
+    createdAt: new Date(),
+  };
 };
