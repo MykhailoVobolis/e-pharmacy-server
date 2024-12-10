@@ -28,7 +28,7 @@ export const getAllProducts = async ({
   if (filter.name) {
     productsQuery
       .where('name')
-      .equals(filter.name)
+      .regex(new RegExp(filter.name, 'i'))
       .collation({ locale: 'en', strength: 2 }); // ігнорує регістр введеного значення
   }
 
