@@ -43,9 +43,15 @@ export const addProductsToCart = async (userId, products) => {
     );
 
     if (existingProduct) {
-      existingProduct.quantity += newProduct.quantity;
-      existingProduct.price = newProduct.price;
+      // Якщо кількість нового товару не дорівнює існуючій, оновлюємо кількість
+      if (newProduct.quantity !== existingProduct.quantity) {
+        existingProduct.quantity = newProduct.quantity;
+        existingProduct.price = newProduct.price; // Оновлюємо ціну продукту
+      } else {
+        return; // Нічого не змінюємо, якщо кількість однакова
+      }
     } else {
+      // Якщо продукту немає в кошику — додаємо його
       cart.products.push(newProduct);
     }
   });
